@@ -28,6 +28,10 @@ const router = new VueRouter({
     }
   ]
 })
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 // 挂载路由导航守卫
 router.beforeEach((to, from, next) => {
   // to将要访问的路径
