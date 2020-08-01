@@ -25,7 +25,9 @@
           </el-input>
         </el-col>
         <el-col :span="4">
-          <el-button type="primary" @click="addDialogVisible = true">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true"
+            >添加用户</el-button
+          >
         </el-col>
       </el-row>
       <!--用户列表信息渲染区域-->
@@ -88,30 +90,37 @@
     </el-card>
     <!--添加用户对话框-->
     <el-dialog
-    title="添加用户"
-    :visible.sync="addDialogVisible"
-    width="50%">
-    <!--内容主体区-->
-    <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
-      <el-form-item label="用户名" prop="username">
-        <el-input v-model="addForm.username"></el-input>
-      </el-form-item>
-      <el-form-item label="密码" prop="password">
-        <el-input v-model="addForm.password"></el-input>
-      </el-form-item>
-      <el-form-item label="邮箱" prop="email">
-        <el-input v-model="addForm.email"></el-input>
-      </el-form-item>
-      <el-form-item label="手机" prop="mobile">
-        <el-input v-model="addForm.mobile"></el-input>
-      </el-form-item>
-    </el-form>
-    <!--底部区域-->
-    <span slot="footer" class="dialog-footer">
-      <el-button @click="addDialogVisible = false">取 消</el-button>
-      <el-button type="primary" @click="addDialogVisible = false">确 定</el-button>
-    </span>
-  </el-dialog>
+      title="添加用户"
+      :visible.sync="addDialogVisible"
+      width="50%"
+      @close="addDialogClosed"
+    >
+      <!--内容主体区-->
+      <el-form
+        :model="addForm"
+        :rules="addFormRules"
+        ref="addFormRef"
+        label-width="70px"
+      >
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" prop="mobile">
+          <el-input v-model="addForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <!--底部区域-->
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addUser">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -217,6 +226,28 @@ export default {
         return this.$message.error('修改用户状态失败')
       }
       this.$message.success('更新用户状态成功')
+    },
+    // 监听对话框关闭事件
+    addDialogClosed() {
+      this.$refs.addFormRef.resetField()
+    },
+    // 点击确定按钮添加用户
+    addUser() {
+      this.$refs.addFormRef.validate(async valid => {
+        if (!valid) return
+        // 可以发起添加用户的网络请求
+        const { data: res } = await this.$http.post('users', this.addForm)
+
+        if (res.meta.status !== 201) {
+          this.$message.error('添加用户失败！')
+        }
+
+        this.$message.success('添加用户成功！')
+        // 隐藏添加用户的对话框
+        this.addDialogVisible = false
+        // 重新获取用户列表数据
+        this.getUserList()
+      })
     }
   }
 }
